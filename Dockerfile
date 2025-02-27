@@ -8,7 +8,7 @@ RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
 # 克隆仓库（构建时拉取代码）
 RUN git clone https://github.com/huzheyi/GrocyCompanionCN.git /app
 
-RUN pip install --no-cache-dir -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple
+RUN pip install --no-cache-dir -r requirements.txt
 
 EXPOSE 9288
 

@@ -1,23 +1,24 @@
-本项目fork自https://github.com/osnsyc/GrocyCompanionCN, 并做了少量改动，主要是条码爬取方面现在增加了授权认证部分，感谢原作者。
+# GrocyCompanionCN
 
-# 特性
+GrocyCompanionCN is a http server working with grocy for prefetching goods information from the Internet. This project is a fork from https://github.com/osnsyc/GrocyCompanionCN, and a little bit modification is done to pass the authentication of GDS website.
+Thanks to @osnsyc.
+
+## 特性
 
 - Grocy物品扫码出库;
 - Grocy已有物品扫码入库,新物品自动获取商品详情并入库;(商品详情包括:条码,基础信息,图片,GPC类别,保质期判别等)
 
-# 快速开始
+## 快速开始
 
-Grocy配置,Web界面中:
+### Grocy配置
+
+Web界面中:
 - `设置`-`管理API密钥`-`添加`
 - `管理主数据`-`位置`- 根据自身情况添加
 - `管理主数据`- `自定义字段`- `添加`- 表单信息:实体:products;名称GDSInfo;标题:GDSInfo;类型:单行文本,勾选"在表格中显示此列"
 - 配置`数量单位`：`数量单位`-`添加`
 
-```shell
-docker pull osnsyc/grocycompanioncn:latest
-```
-
-创建 config.ini 和 docker-compose.yml 文件
+### 创建 config.ini
 
 ```ini
 # config.ini
@@ -67,12 +68,31 @@ curl -X 'GET' 'https://EXAMPLE.COM:PORT/api/objects/locations' \
 | echo -e "$(cat)"
 ```
 
+### docker运行
+
+docker run方式
+
+```shell
+docker pull ghcr.io/huzheyi/grocycompanioncn:latest
+#docker pull huzheyi/grocycompanioncn:latest
+
+docker run -itd \
+  --name grocycc \
+  --restart=always \
+  -p 9288:9288 \
+  -v ./config.ini:/config/config.ini \
+  ghcr.io/huzheyi/grocycompanioncn:latest
+```
+
+或者docker-compose方式
+
 ```yml
 # docker-compose.yml
 version: "3"
 services:
   spider:
-    image: 
+    container_name: grocycc
+    image: ghcr.io/huzheyi/grocycompanioncn:latest
     restart: always
     ports:
       - "9288:9288"
@@ -90,9 +110,12 @@ networks:
 ```yml
  - ./u2net.onnx:/root/.u2net/u2net.onnx
 ```
+
 ```shell
 docker compose up -d
 ```
+
+### 测试
 
 打开`http://127.0.0.1:9288`,看到页面显示`GrocyCNCompanion Started!`,服务已成功运行.
 

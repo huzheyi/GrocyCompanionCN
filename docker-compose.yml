@@ -1,12 +1,13 @@
 version: "3"
 services:
   spider:
-    image: osnsyc/grocycompanioncn:latest
+    container_name: grocycc
+    image: ghcr.io/huzheyi/grocycompanioncn:latest
     restart: always
     ports:
       - "9288:9288"
     volumes:
-      - ./config.ini:/usr/src/app/config.ini
+      - ./config.ini:/config/config.ini
       # - ./u2net.onnx:/root/.u2net/u2net.onnx
     networks:
       - grocy_cn_campanion
