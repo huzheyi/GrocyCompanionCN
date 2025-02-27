@@ -1,4 +1,4 @@
-本项目fork自https://github.com/osnsyc/GrocyCompanionCN，并做了少量改动，主要是条码爬取方面现在增加了授权认证部分，感谢原作者。
+本项目fork自https://github.com/osnsyc/GrocyCompanionCN, 并做了少量改动，主要是条码爬取方面现在增加了授权认证部分，感谢原作者。
 
 # 特性
 
