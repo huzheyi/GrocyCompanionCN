@@ -15,13 +15,15 @@ class BarCodeSpider:
     '''
     条形码爬虫类
     '''
-    def __init__(self, rapid_api_url="https://barcodes1.p.rapidapi.com/", 
+    def __init__(self, gds_api_bearer="",
+                 rapid_api_url="https://barcodes1.p.rapidapi.com/", 
                  x_rapidapi_key="", 
                  x_rapidapi_host="barcodes1.p.rapidapi.com"):
 
         self.logger = logging.getLogger(__name__)
-        self.user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36"
-        self.base_url = 'https://bff.gds.org.cn/gds/searching-api/ProductService/homepagestatistic'
+        self.user_agent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36"
+        self.gds_api_bearer = "Bearer " + gds_api_bearer
+        self.base_url = "https://bff.gds.org.cn/gds/searching-api/ProductService/homepagestatistic"
         self.domestic_url = "https://bff.gds.org.cn/gds/searching-api/ProductService/ProductListByGTIN"
         self.domestic_url_simple = "https://bff.gds.org.cn/gds/searching-api/ProductService/ProductSimpleInfoByGTIN"
         self.imported_url = "https://bff.gds.org.cn/gds/searching-api/ImportProduct/GetImportProductDataForGtin"
@@ -33,6 +35,7 @@ class BarCodeSpider:
     def get_domestic_good(self, barcode):
         session = requests.session()
         session.headers.update({'User-Agent': self.user_agent})
+        session.headers.update({'Authorization': self.gds_api_bearer})
         response = session.get(self.base_url)
         if response.status_code != 200:
             self.logger.error(
@@ -74,6 +77,7 @@ class BarCodeSpider:
     def get_imported_good(self, barcode):
         session = requests.session()
         session.headers.update({'User-Agent': self.user_agent})
+        session.headers.update({'Authorization': self.gds_api_bearer})
         response = session.get(self.base_url)
         if response.status_code != 200:
             self.logger.error(
@@ -82,7 +86,7 @@ class BarCodeSpider:
             good_blk = self.get_imorted_good_from_blk(barcode)
             return good_blk
 
-        payload = {'PageSize': '30', 'PageIndex': '1', 'Gtin': str(barcode), "Description": "", "AndOr": "0"}
+        payload = {'PageSize': '30', 'PageIndex': '1', 'Gtin': str(barcode),  "AndOr": "0"}
         response_imported_url = session.get(self.imported_url, params=payload)
         if response_imported_url.status_code != 200:
             self.logger.error(
@@ -103,7 +107,7 @@ class BarCodeSpider:
         if (len(good["Data"]["Items"]) == 1) and (good["Data"]["Items"][0]["description_cn"] == None):
             good_blk = self.get_imorted_good_from_blk(barcode)
             return good_blk
-          
+                      
         if len(good["Data"]["Items"]) >= 2:
             for item in good["Data"]["Items"]:
                 if item["realname"] == item["importer_name"]:

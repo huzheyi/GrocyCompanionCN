@@ -10,17 +10,28 @@ from pygrocy import Grocy, EntityType
 
 from spider.barcode_spider import BarCodeSpider
 
-config = configparser.ConfigParser()
-config.read('config.ini')
-GROCY_URL = config.get('Grocy', 'GROCY_URL')
-GROCY_PORT = config.getint('Grocy', 'GROCY_PORT')
-GROCY_API = config.get('Grocy', 'GROCY_API')
-GROCY_DEFAULT_QUANTITY_UNIT_ID = config.getint('Grocy', 'GROCY_DEFAULT_QUANTITY_UNIT_ID')
-GROCY_DEFAULT_BEST_BEFORE_DAYS = config.get('Grocy', 'GROCY_DEFAULT_BEST_BEFORE_DAYS')
-GROCY_LOCATION = {}
-for key in config['GrocyLocation']:
-    GROCY_LOCATION[key] = config.get('GrocyLocation', key)
-X_RapidAPI_Key = config.get('RapidAPI', 'X_RapidAPI_Key')
+
+def read_config(path):
+    config = configparser.ConfigParser()
+    config.read(path)
+    global GROCY_URL, GROCY_PORT, GROCY_API, GROCY_DEFAULT_QUANTITY_UNIT_ID, GROCY_DEFAULT_BEST_BEFORE_DAYS, GROCY_LOCATION, X_RapidAPI_Key, GDS_API_Bearer
+    GROCY_URL = config.get('Grocy', 'GROCY_URL')
+    GROCY_PORT = config.getint('Grocy', 'GROCY_PORT')
+    GROCY_API = config.get('Grocy', 'GROCY_API')
+    GROCY_DEFAULT_QUANTITY_UNIT_ID = config.getint('Grocy', 'GROCY_DEFAULT_QUANTITY_UNIT_ID')
+    GROCY_DEFAULT_BEST_BEFORE_DAYS = config.get('Grocy', 'GROCY_DEFAULT_BEST_BEFORE_DAYS')
+    GROCY_LOCATION = {}
+    for key in config['GrocyLocation']:
+        GROCY_LOCATION[key] = config.get('GrocyLocation', key)
+    X_RapidAPI_Key = config.get('RapidAPI', 'X_RapidAPI_Key')
+    GDS_API_Bearer = config.get('GDS', 'GDS_API_Bearer')
+
+try:
+    read_config('/config/config.ini')
+except:
+    print("/config/config.ini not found, using ./config.ini")
+    read_config('config.ini')
+# config.read('config.ini')
 
 app = Flask(__name__)
 grocy = Grocy(GROCY_URL, GROCY_API, GROCY_PORT, verify_ssl = True)
@@ -140,10 +151,15 @@ def add():
         return jsonify(response_data), 200
     except:
         if aimid == "]E0":
-            spider = BarCodeSpider(rapid_api_url="https://barcodes1.p.rapidapi.com/", 
+            spider = BarCodeSpider(gds_api_bearer=GDS_API_Bearer,
+                                   rapid_api_url="https://barcodes1.p.rapidapi.com/", 
                                    x_rapidapi_key=X_RapidAPI_Key,
                                    x_rapidapi_host="barcodes1.p.rapidapi.com")
             good = spider.get_good(barcode)
+            print("Barcode: ", barcode, "\n", good) #debug
+            if not good:
+                response_data = {"message": "Fail to get item info"}
+                return jsonify(response_data), 400
             if add_product(good, client):
                 response_data = {"message": "New item added successfully"}
                 return jsonify(response_data), 200
